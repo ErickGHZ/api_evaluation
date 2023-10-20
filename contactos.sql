@@ -4,8 +4,8 @@ CREATE TABLE contactos (
     telefono TEXT
 );
 
-INSERT INTO contactos (email, nombre, telefonos)
+INSERT INTO contactos (email, nombre, telefono)
 VALUES ("juan@example.com", "Juan Pérez", "555-123-4567");
 
-INSERT INTO contactos (emial, nombre, telefono)
+INSERT INTO contactos (email, nombre, telefono)
 VALUES ("maria@example.com", "María García", "555-678-9012");
