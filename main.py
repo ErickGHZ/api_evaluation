@@ -1,5 +1,6 @@
 import fastapi
-import mysql.connector
+from fastapi.middleware.cors import CORSMiddleware
+import sqlite3
 from pydantic import BaseModel
 
 # Establece la conexión a la base de datos MySQL
@@ -13,6 +14,17 @@ conn = mysql.connector.connect(
 
 app = fastapi.FastAPI()
 
+origins = [
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 class Contacto(BaseModel):
     email: str
     nombre: str
