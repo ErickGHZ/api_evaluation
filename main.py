@@ -15,7 +15,7 @@ conn = mysql.connector.connect(
 app = fastapi.FastAPI()
 
 origins = [
-    "http://localhost:8080"
+    "http://localhost:8080",
     "https://heroku-mysql-frontend-ac0fa64dec05.herokuapp.com",
 ]
 
