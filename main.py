@@ -7,7 +7,7 @@ from pydantic import BaseModel
 conn = mysql.connector.connect(
     host="cxmgkzhk95kfgbq4.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
     user="ozsvheyeiz9rh52q",
-    password="b2pg8um97obi3non",    
+    password="myau9muxa9da64f7",    
     port="3306",
     database="w9t730hcg8tu8xon"
 )
@@ -16,7 +16,7 @@ app = fastapi.FastAPI()
 
 origins = [
     "http://localhost:8080",
-    "https://heroku-mysql-frontend-ac0fa64dec05.herokuapp.com"
+    "https://heroku-mysql-frontend-ac0fa64dec05.herokuapp.com",
 ]
 
 app.add_middleware(
