@@ -26,6 +26,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )   
+
 class Contacto(BaseModel):
     email: str
     nombre: str
@@ -35,65 +36,63 @@ class Contacto(BaseModel):
 async def crear_contacto(contacto: Contacto):
     """Crea un nuevo contacto."""
     try:
-        cursor = conn.cursor()
-        cursor.execute('INSERT INTO contactos (email, nombre, telefono) VALUES (%s, %s, %s)',
-                       (contacto.email, contacto.nombre, contacto.telefono))
+        with conn.cursor() as cursor:
+            cursor.execute('INSERT INTO contactos (email, nombre, telefono) VALUES (%s, %s, %s)',
+                           (contacto.email, contacto.nombre, contacto.telefono))
         conn.commit()
-        cursor.close()
         return contacto
-    except Exception as e:
+    except mysql.connector.Error as e:
         return {"error": str(e)}
 
 @app.get("/contactos")
 async def obtener_contactos():
     """Obtiene todos los contactos."""
     try:
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM contactos;')
-        response = []
-        for row in cursor:
-            contacto = {"email": row[0], "nombre": row[1], "telefono": row[2]}
-            response.append(contacto)
-        cursor.close()
+        with conn.cursor() as cursor:
+            cursor.execute('SELECT * FROM contactos;')
+            response = [{"email": row[0], "nombre": row[1], "telefono": row[2]} for row in cursor]
         return response
-    except Exception as e:
+    except mysql.connector.Error as e:
         return {"error": str(e)}
 
 @app.get("/contactos/{email}")
 async def obtener_contacto(email: str):
     """Obtiene un contacto por su email."""
     try:
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM contactos WHERE email = %s', (email,))
-        contacto = None
-        for row in cursor:
-            contacto = {"email": row[0], "nombre": row[1], "telefono": row[2]}
-        cursor.close()
-        return contacto
-    except Exception as e:
+        with conn.cursor() as cursor:
+            cursor.execute('SELECT * FROM contactos WHERE email = %s', (email,))
+            contacto = [{"email": row[0], "nombre": row[1], "telefono": row[2]} for row in cursor]
+        return contacto[0] if contacto else {"mensaje": "Contacto no encontrado"}
+    except mysql.connector.Error as e:
         return {"error": str(e)}
 
 @app.put("/contactos/{email}")
 async def actualizar_contacto(email: str, contacto: Contacto):
     """Actualiza un contacto."""
     try:
-        cursor = conn.cursor()
-        cursor.execute('UPDATE contactos SET nombre = %s, telefono = %s WHERE email = %s',
-                       (contacto.nombre, contacto.telefono, email))
+        with conn.cursor() as cursor:
+            cursor.execute('SELECT * FROM contactos WHERE email = %s', (email,))
+            if cursor.fetchone() is None:
+                return {"error": "El contacto no existe"}
+            
+            cursor.execute('UPDATE contactos SET nombre = %s, telefono = %s WHERE email = %s',
+                           (contacto.nombre, contacto.telefono, email))
         conn.commit()
-        cursor.close()
         return contacto
-    except Exception as e:
+    except mysql.connector.Error as e:
         return {"error": str(e)}
 
 @app.delete("/contactos/{email}")
 async def eliminar_contacto(email: str):
     """Elimina un contacto."""
     try:
-        cursor = conn.cursor()
-        cursor.execute('DELETE FROM contactos WHERE email = %s', (email,))
+        with conn.cursor() as cursor:
+            cursor.execute('SELECT * FROM contactos WHERE email = %s', (email,))
+            if cursor.fetchone() is None:
+                return {"error": "El contacto no existe"}
+            
+            cursor.execute('DELETE FROM contactos WHERE email = %s', (email,))
         conn.commit()
-        cursor.close()
         return {"mensaje": "Contacto eliminado"}
-    except Exception as e:
+    except mysql.connector.Error as e:
         return {"error": str(e)}
