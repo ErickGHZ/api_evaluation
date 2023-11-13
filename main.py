@@ -1,5 +1,6 @@
 import fastapi
 import sqlite3
+from fastapi import HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -27,15 +28,27 @@ class Contacto(BaseModel):
     nombre : str
     telefono : str
 
-# Rutas para las operaciones CRUD
 @app.post("/contactos")
 async def crear_contacto(contacto: Contacto):
-    c = conn.cursor()
-    c.execute('INSERT INTO contactos (email, nombre, telefono) VALUES (?, ?, ?)',
-              (contacto.email, contacto.nombre, contacto.telefono))
-    conn.commit()
-    return contacto
+    try:
+        # Verificar si el contacto ya existe
+        c = conn.cursor()
+        c.execute('SELECT COUNT(*) FROM contactos WHERE email = ?', (contacto.email,))
+        count = c.fetchone()[0]
 
+        if count > 0:
+            # El contacto ya existe, devolver un error
+            raise HTTPException(status_code=400, detail="El contacto ya existe")
+
+        # Si no hay duplicados, proceder con la inserción
+        c.execute('INSERT INTO contactos (email, nombre, telefono) VALUES (?, ?, ?)',
+                  (contacto.email, contacto.nombre, contacto.telefono))
+        conn.commit()
+        
+        return contacto
+    except Exception as e:
+        logging.error(str(e))
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 @app.get("/contactos")
 async def obtener_contactos():
