@@ -1,3 +1,4 @@
+import logging
 import fastapi
 import sqlite3
 from fastapi import HTTPException
