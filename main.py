@@ -34,66 +34,54 @@ class Contacto(BaseModel):
 @app.post("/contactos")
 async def crear_contacto(contacto: Contacto):
     """Crea un nuevo contacto."""
-    try:
-        cursor = conn.cursor()
-        cursor.execute('INSERT INTO contactos (email, nombre, telefono) VALUES (%s, %s, %s)',
-                       (contacto.email, contacto.nombre, contacto.telefono))
-        conn.commit()
-        cursor.close()
-        return contacto
-    except Exception as e:
-        return {"error": str(e)}
+    # TODO Inserta el contacto en la base de datos y responde con un mensaje
+    c = conn.cursor()
+    c.execute('INSERT INTO contactos (email, nombre, telefono) VALUES (?, ?, ?)',
+              (contacto.email, contacto.nombre, contacto.telefono))
+    conn.commit()
+    return contacto
 
 @app.get("/contactos")
 async def obtener_contactos():
     """Obtiene todos los contactos."""
-    try:
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM contactos;')
-        response = []
-        for row in cursor:
-            contacto = {"email": row[0], "nombre": row[1], "telefono": row[2]}
-            response.append(contacto)
-        cursor.close()
-        return response
-    except Exception as e:
-        return {"error": str(e)}
+    # TODO Consulta todos los contactos de la base de datos y los envia en un JSON
+    c = conn.cursor()
+    c.execute('SELECT * FROM contactos;')
+    response = []
+    for row in c:
+        contacto = {"email":row[0],"nombre":row[1], "telefono":row[2]}
+        response.append(contacto)
+    return response
+
 
 @app.get("/contactos/{email}")
 async def obtener_contacto(email: str):
     """Obtiene un contacto por su email."""
-    try:
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM contactos WHERE email = %s', (email,))
-        contacto = None
-        for row in cursor:
-            contacto = {"email": row[0], "nombre": row[1], "telefono": row[2]}
-        cursor.close()
-        return contacto
-    except Exception as e:
-        return {"error": str(e)}
+    # Consulta el contacto por su email
+    c = conn.cursor()
+    c.execute('SELECT * FROM contactos WHERE email = ?', (email,))
+    contacto = None
+    for row in c:
+        contacto = {"email":row[0],"nombre":row[1],"telefono":row[2]}
+    return contacto
+
 
 @app.put("/contactos/{email}")
 async def actualizar_contacto(email: str, contacto: Contacto):
     """Actualiza un contacto."""
-    try:
-        cursor = conn.cursor()
-        cursor.execute('UPDATE contactos SET nombre = %s, telefono = %s WHERE email = %s',
-                       (contacto.nombre, contacto.telefono, email))
-        conn.commit()
-        cursor.close()
-        return contacto
-    except Exception as e:
-        return {"error": str(e)}
+    # TODO Actualiza el contacto en la base de datos
+    c = conn.cursor()
+    c.execute('UPDATE contactos SET nombre = ?, telefono = ? WHERE email = ?',
+              (contacto.nombre, contacto.telefono, email))
+    conn.commit()
+    return contacto
+
 
 @app.delete("/contactos/{email}")
 async def eliminar_contacto(email: str):
     """Elimina un contacto."""
-    try:
-        cursor = conn.cursor()
-        cursor.execute('DELETE FROM contactos WHERE email = %s', (email,))
-        conn.commit()
-        cursor.close()
-        return {"mensaje": "Contacto eliminado"}
-    except Exception as e:
-        return {"error": str(e)}
+    # TODO Elimina el contacto de la base de datos
+    c = conn.cursor()
+    c.execute('DELETE FROM contactos WHERE email = ?', (email,))
+    conn.commit()
+    return {"mensaje":"Contacto eliminado"}
