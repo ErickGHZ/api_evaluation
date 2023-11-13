@@ -28,16 +28,14 @@ class Contacto(BaseModel):
     telefono : str
 
 # Rutas para las operaciones CRUD
-
 @app.post("/contactos")
 async def crear_contacto(contacto: Contacto):
-    """Crea un nuevo contacto."""
-    # TODO Inserta el contacto en la base de datos y responde con un mensaje
     c = conn.cursor()
     c.execute('INSERT INTO contactos (email, nombre, telefono) VALUES (?, ?, ?)',
               (contacto.email, contacto.nombre, contacto.telefono))
     conn.commit()
     return contacto
+
 
 @app.get("/contactos")
 async def obtener_contactos():
@@ -67,13 +65,11 @@ async def obtener_contacto(email: str):
 @app.put("/contactos/{email}")
 async def actualizar_contacto(email: str, contacto: Contacto):
     """Actualiza un contacto."""
-    # TODO Actualiza el contacto en la base de datos
     c = conn.cursor()
     c.execute('UPDATE contactos SET nombre = ?, telefono = ? WHERE email = ?',
               (contacto.nombre, contacto.telefono, email))
     conn.commit()
     return contacto
-
 
 @app.delete("/contactos/{email}")
 async def eliminar_contacto(email: str):
