@@ -39,12 +39,9 @@ async def crear_contacto(contacto: Contacto):
         with conn.cursor() as cursor:
             cursor.execute('INSERT INTO contactos (email, nombre, telefono) VALUES (%s, %s, %s)',
                            (contacto.email, contacto.nombre, contacto.telefono))
-            print(f"Registro insertado: {contacto}")
         conn.commit()
         return contacto
     except mysql.connector.Error as e:
-        conn.rollback()  # Deshace la transacción en caso de error
-        print(f"Error al insertar registro: {str(e)}")
         return {"error": str(e)}
 
 @app.get("/contactos")
@@ -54,10 +51,8 @@ async def obtener_contactos():
         with conn.cursor() as cursor:
             cursor.execute('SELECT * FROM contactos;')
             response = [{"email": row[0], "nombre": row[1], "telefono": row[2]} for row in cursor]
-            print(f"Registros obtenidos: {response}")
         return response
     except mysql.connector.Error as e:
-        print(f"Error al obtener registros: {str(e)}")
         return {"error": str(e)}
 
 @app.get("/contactos/{email}")
@@ -67,10 +62,8 @@ async def obtener_contacto(email: str):
         with conn.cursor() as cursor:
             cursor.execute('SELECT * FROM contactos WHERE email = %s', (email,))
             contacto = [{"email": row[0], "nombre": row[1], "telefono": row[2]} for row in cursor]
-        print(f"Contacto obtenido por email {email}: {contacto[0] if contacto else None}")
         return contacto[0] if contacto else {"mensaje": "Contacto no encontrado"}
     except mysql.connector.Error as e:
-        print(f"Error al obtener contacto por email {email}: {str(e)}")
         return {"error": str(e)}
 
 @app.put("/contactos/{email}")
@@ -80,16 +73,13 @@ async def actualizar_contacto(email: str, contacto: Contacto):
         with conn.cursor() as cursor:
             cursor.execute('SELECT * FROM contactos WHERE email = %s', (email,))
             if cursor.fetchone() is None:
-                print(f"El contacto con email {email} no existe")
                 return {"error": "El contacto no existe"}
             
             cursor.execute('UPDATE contactos SET nombre = %s, telefono = %s WHERE email = %s',
                            (contacto.nombre, contacto.telefono, email))
         conn.commit()
-        print(f"Contacto actualizado: {contacto}")
         return contacto
     except mysql.connector.Error as e:
-        print(f"Error al actualizar contacto: {str(e)}")
         return {"error": str(e)}
 
 @app.delete("/contactos/{email}")
@@ -99,13 +89,10 @@ async def eliminar_contacto(email: str):
         with conn.cursor() as cursor:
             cursor.execute('SELECT * FROM contactos WHERE email = %s', (email,))
             if cursor.fetchone() is None:
-                print(f"El contacto con email {email} no existe")
                 return {"error": "El contacto no existe"}
             
             cursor.execute('DELETE FROM contactos WHERE email = %s', (email,))
         conn.commit()
-        print(f"Contacto eliminado: {email}")
         return {"mensaje": "Contacto eliminado"}
     except mysql.connector.Error as e:
-        print(f"Error al eliminar contacto: {str(e)}")
         return {"error": str(e)}
