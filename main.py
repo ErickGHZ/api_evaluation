@@ -39,6 +39,7 @@ async def crear_contacto(contacto: Contacto):
         cursor.execute('INSERT INTO contactos (email, nombre, telefono) VALUES (%s, %s, %s)',
                        (contacto.email, contacto.nombre, contacto.telefono))
         conn.commit()
+        cursor.close()
         return contacto
     except Exception as e:
         return {"error": str(e)}
@@ -53,6 +54,7 @@ async def obtener_contactos():
         for row in cursor:
             contacto = {"email": row[0], "nombre": row[1], "telefono": row[2]}
             response.append(contacto)
+        cursor.close()
         return response
     except Exception as e:
         return {"error": str(e)}
@@ -66,6 +68,7 @@ async def obtener_contacto(email: str):
         contacto = None
         for row in cursor:
             contacto = {"email": row[0], "nombre": row[1], "telefono": row[2]}
+        cursor.close()
         return contacto
     except Exception as e:
         return {"error": str(e)}
@@ -78,6 +81,7 @@ async def actualizar_contacto(email: str, contacto: Contacto):
         cursor.execute('UPDATE contactos SET nombre = %s, telefono = %s WHERE email = %s',
                        (contacto.nombre, contacto.telefono, email))
         conn.commit()
+        cursor.close()
         return contacto
     except Exception as e:
         return {"error": str(e)}
@@ -89,6 +93,7 @@ async def eliminar_contacto(email: str):
         cursor = conn.cursor()
         cursor.execute('DELETE FROM contactos WHERE email = %s', (email,))
         conn.commit()
+        cursor.close()
         return {"mensaje": "Contacto eliminado"}
     except Exception as e:
         return {"error": str(e)}
